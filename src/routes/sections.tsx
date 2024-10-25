@@ -7,16 +7,18 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
+import { UserBankData } from 'src/sections/user/view/user-bank-details';
 import { ProfilePage } from '../sections/user/view/user-profile';
-
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
-// export const ProfilePage = lazy(() => import('../sections/user/view/user-profile'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
+export const DashboardUser = lazy(() => import('src/sections/dashboardUser'));
+export const ContactDetails = lazy(() => import('src/sections/contact/view/contact-view'));
+export const TransactionPage = lazy(() => import('src/sections/transaction/view/transaction'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
 // ----------------------------------------------------------------------
@@ -45,10 +47,12 @@ export function Router() {
         </DashboardLayout>
       ),
       children: [
-        { element: <HomePage />, index: true },
+        { element: <DashboardUser />, index: true },
         { path: 'user', element: <UserPage /> },
         { path: 'profile', element: <ProfilePage /> },
-        { path: 'blog', element: <BlogPage /> },
+        { path: 'transaction', element: <TransactionPage /> },
+        { path: 'contact', element: <ContactDetails /> },
+        { path: 'bank-record', element: <UserBankData /> },
       ],
     },
     {

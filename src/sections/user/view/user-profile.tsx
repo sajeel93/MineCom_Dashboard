@@ -10,7 +10,7 @@ type ProfilePageProps = {
 export function ProfilePage() {
   // Form state
   const [email, setEmail] = useState('');
-  const [residentialAddress, setResidentialAddress] = useState('');
+  const [address, setAddress] = useState('');
   const [surname, setSurname] = useState('');
   const [name, setName] = useState('');
   const [username, setUserName] = useState('');
@@ -27,14 +27,12 @@ export function ProfilePage() {
           },
         });
 
-        console.log(response, 'response');
-
         // Assuming the response contains user's profile data
         const profileData = response.data;
 
         // Populate the form fields with profile data
         setEmail(profileData.email);
-        setResidentialAddress(profileData.residentialAddress || ''); // If residentialAddress is part of the user profile
+        setAddress(profileData.address || ''); // If address is part of the user profile
         setSurname(profileData.surname || '');
         setName(profileData.name || '');
         setUserName(profileData.username || '');
@@ -53,7 +51,7 @@ export function ProfilePage() {
 
     const formData = {
       email,
-      residentialAddress,
+      address,
       surname,
       name,
       username,
@@ -97,9 +95,9 @@ export function ProfilePage() {
 
         {/* Residential Address Field */}
         <TextField
-          label="Residential Address"
-          value={residentialAddress}
-          onChange={(e) => setResidentialAddress(e.target.value)}
+          label="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
           fullWidth
           margin="normal"
         />
@@ -128,7 +126,7 @@ export function ProfilePage() {
         <TextField
           label="UserName"
           value={username}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setUserName(e.target.value)} // Fix the handler for username
           fullWidth
           required
           margin="normal"
@@ -146,9 +144,8 @@ export function ProfilePage() {
           <TextField
             label="Your Recommender ID"
             value={recommenderId}
+            onChange={(e) => setRecommenderId(e.target.value)}
             fullWidth
-            InputProps={{ readOnly: true }} // Read-only, auto-generated
-            disabled
           />
         </Box>
 

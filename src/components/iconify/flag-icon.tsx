@@ -39,7 +39,7 @@ export const FlagIcon = forwardRef<HTMLSpanElement, FlagIconProps>(
         sx={{ ...baseStyles, ...sx }}
         {...other}
       >
-        <Box
+        {/* <Box
           component="img"
           loading="lazy"
           alt={code}
@@ -50,7 +50,7 @@ export const FlagIcon = forwardRef<HTMLSpanElement, FlagIconProps>(
             maxWidth: 'unset',
             objectFit: 'cover',
           }}
-        />
+        /> */}
       </Box>
     );
   }
