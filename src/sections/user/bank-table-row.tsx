@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import axiosInstance from 'src/utils/axios';
 
 import Box from '@mui/material/Box';
@@ -44,99 +44,74 @@ export function BankTableRow({
   onSelectRow,
   onUserDeleted,
 }: UserTableRowProps) {
-  const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const [filteredDeposits, setFilteredDeposits] = useState<any[]>([]); // Store filtered deposits
 
   const { dashboard } = row;
 
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    setOpenPopover(event.currentTarget);
-  }, []);
+  useEffect(() => {
+    const filteredDepositsList: any[] = [];
 
-  const handleClosePopover = useCallback(() => {
-    setOpenPopover(null);
-  }, []);
+    dashboard?.forEach(
+      (item: {
+        recommenderId: string;
+        dashboard: { balance: number; deposits: Array<{ amount: number; deposit_date: string }> };
+      }) => {
+        item?.dashboard?.deposits?.forEach(
+          (deposit: { amount: number; deposit_date: string }, depositIndex: number) => {
+            // Get the matching transaction for this specific recommenderId
+            const matchingTransaction = usersTransactrion?.find(
+              (transaction: { recommenderId: string }) =>
+                transaction?.recommenderId === item?.recommenderId
+            );
 
-  console.log(usersTransactrion, 'usersTransactrion');
+            // Push each deposit to the list, even if there is no matching transaction
+            filteredDepositsList.push({
+              deposit,
+              depositIndex, // Add the depositIndex explicitly
+              item, // User information
+              matchingTransaction: matchingTransaction || null, // Use null if no matching transaction
+            });
+          }
+        );
+      }
+    );
 
-  const handleDeleteUser = useCallback(async () => {
-    try {
-      await axiosInstance.delete(`/users/${row.id}`); // Delete user by id from Strapi
-      onUserDeleted(row.id); // Call the parent method to update the user list
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    } finally {
-      handleClosePopover(); // Close the popover after action
-    }
-  }, [row.id, onUserDeleted, handleClosePopover]);
-
-  // Create a closure to hold the last displayed transaction ID
-  let lastDisplayedTransactionId: number | null = null;
+    // Update the filtered deposits state once
+    setFilteredDeposits(filteredDepositsList);
+  }, [dashboard, usersTransactrion]);
 
   return (
     <>
-      {/* Iterate over dashboard items */}
-      {dashboard?.map(
-        (item: {
-          recommenderId: string;
-          dashboard: { balance: number; deposits: Array<{ amount: number; deposit_date: string }> };
-        }) =>
-          // Iterate over each deposit and display it in a new line
-          item?.dashboard?.deposits?.map(
-            (deposit: { amount: number; deposit_date: string }, depositIndex: number) => {
-              // Match the recommenderId with usersTransactrion to find iban and account_holder_name
-              const matchingTransaction = usersTransactrion?.find(
-                (transaction: { recommenderId: string; id: number }) =>
-                  transaction.recommenderId === item.recommenderId &&
-                  transaction.id !== lastDisplayedTransactionId // Ensure we don't match the last displayed transaction
-              );
+      {/* Iterate over the filtered deposits and render table rows */}
+      {filteredDeposits.map(({ deposit, item, matchingTransaction }, depositIndex) => (
+        <TableRow hover tabIndex={-1} role="checkbox" selected={selected} key={depositIndex}>
+          <TableCell padding="checkbox">
+            <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
+          </TableCell>
 
-              console.log(matchingTransaction, 'matchingTransaction');
-              console.log(lastDisplayedTransactionId, 'lastDisplayedTransactionId');
+          {/* Display RecommenderId */}
+          <TableCell>{item.recommenderId}</TableCell>
 
-              // Only display the row if a matching transaction is found
-              if (!matchingTransaction) return null;
+          {/* Display Balance */}
+          <TableCell component="th" scope="row">
+            <Box gap={2} display="flex" alignItems="center">
+              {item.dashboard.balance}
+            </Box>
+          </TableCell>
 
-              // Update lastDisplayedTransactionId
-              lastDisplayedTransactionId = matchingTransaction.id;
+          {/* Display Deposit Amount */}
+          <TableCell>{deposit.amount}</TableCell>
 
-              return (
-                <TableRow
-                  hover
-                  tabIndex={-1}
-                  role="checkbox"
-                  selected={selected}
-                  key={depositIndex}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
-                  </TableCell>
+          {/* Display Deposit Date */}
+          <TableCell>{deposit.deposit_date}</TableCell>
 
-                  {/* Display RecommenderId */}
-                  <TableCell>{item.recommenderId}</TableCell>
+          {/* Display IBAN */}
+          <TableCell>{matchingTransaction?.iban || '-'}</TableCell>
 
-                  {/* Display Balance */}
-                  <TableCell component="th" scope="row">
-                    <Box gap={2} display="flex" alignItems="center">
-                      {item.dashboard.balance}
-                    </Box>
-                  </TableCell>
-
-                  {/* Display Deposit Amount */}
-                  <TableCell>{deposit.amount}</TableCell>
-
-                  {/* Display Deposit Date */}
-                  <TableCell>{deposit.deposit_date}</TableCell>
-
-                  {/* Display IBAN */}
-                  <TableCell>{matchingTransaction?.iban || '-'}</TableCell>
-
-                  {/* Display Account Holder Name */}
-                  <TableCell>{matchingTransaction?.account_holder_name || '-'}</TableCell>
-                </TableRow>
-              );
-            }
-          )
-      )}
+          {/* Display Account Holder Name */}
+          <TableCell>{matchingTransaction?.account_holder_name || '-'}</TableCell>
+        </TableRow>
+      ))}
     </>
   );
 }
