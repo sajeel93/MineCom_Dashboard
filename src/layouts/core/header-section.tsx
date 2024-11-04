@@ -64,6 +64,8 @@ export function HeaderSection({
       className={layoutClasses.header}
       sx={{
         boxShadow: 'none',
+        marginTop: 3,
+        marginBottom: 6,
         zIndex: 'var(--layout-header-zIndex)',
         ...sx,
       }}
