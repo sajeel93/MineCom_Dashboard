@@ -21,15 +21,37 @@ export function SignUpView() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState('');
+
+  // Check password strength
+  const checkPasswordStrength = (pass: string) => {
+    if (pass.length < 7) {
+      setPasswordStrength('Weak');
+    } else {
+      setPasswordStrength('Strong');
+    }
+  };
 
   // Handle sign up using the custom axios instance
   const handleSignUp = useCallback(async () => {
     setLoading(true);
     setError('');
 
+    // Password validation regex: at least 8 characters, one uppercase, one lowercase
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+
     // Basic validation for password confirmation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Check if password matches the required format
+    if (!passwordRegex.test(password)) {
+      setError(
+        'Password must be at least 8 characters long and contain at least one uppercase and one lowercase letter'
+      );
       setLoading(false);
       return;
     }
@@ -46,18 +68,17 @@ export function SignUpView() {
       // Save JWT token and user info after successful registration
       const { jwt, user } = response.data;
 
-      // Save the token and user ID in local storage
       localStorage.setItem('jwt', jwt);
       localStorage.setItem('userId', user?.id);
       localStorage.setItem('tokenIssueTime', Date.now().toString());
 
-      // Redirect to home or a dashboard page after sign up
-      router.push('/');
+      // Redirect to the sign-in page after sign up
+      router.push('/sign-in');
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setError(
         err?.response?.data?.error?.message
-          ? err?.response?.data?.error?.message
+          ? err.response.data.error.message
           : 'Sign up failed. Please try again.'
       );
     } finally {
@@ -92,7 +113,11 @@ export function SignUpView() {
         name="password"
         label="Password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          const passValue = e.target.value; // Rename here to avoid conflict
+          setPassword(passValue);
+          checkPasswordStrength(passValue); // Check password strength
+        }}
         InputLabelProps={{ shrink: true }}
         type={showPassword ? 'text' : 'password'}
         InputProps={{
@@ -106,6 +131,13 @@ export function SignUpView() {
         }}
         sx={{ mb: 3 }}
       />
+      {/* Password Strength Indicator */}
+      <Typography
+        variant="caption"
+        color={passwordStrength === 'Strong' ? 'success.main' : 'error.main'}
+      >
+        Password Strength: {passwordStrength}
+      </Typography>
 
       <TextField
         fullWidth
