@@ -100,13 +100,13 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
             </Typography>
           </Box>
 
-          {totalUnRead > 0 && (
+          {/* {totalUnRead > 0 && (
             <Tooltip title=" Mark all as read">
               <IconButton color="primary" onClick={handleMarkAllAsRead}>
                 <Iconify icon="solar:check-read-outline" />
               </IconButton>
             </Tooltip>
-          )}
+          )} */}
         </Box>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

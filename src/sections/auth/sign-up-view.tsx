@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import axiosInstance from 'src/utils/axios';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -11,60 +10,73 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { useRouter } from 'src/routes/hooks';
 import { Iconify } from 'src/components/iconify';
 
-export function SignInView() {
+export function SignUpView() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle sign in using the custom axios instance
-  const handleSignIn = useCallback(async () => {
+  // Handle sign up using the custom axios instance
+  const handleSignUp = useCallback(async () => {
     setLoading(true);
     setError('');
+
+    // Basic validation for password confirmation
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await axiosInstance.post('/auth/local', {
-        identifier: email, // Strapi uses "identifier" for email/username
+      const response = await axiosInstance.post('/users', {
+        username,
+        email,
         password,
+        role: 2,
+        confirmed: true,
       });
 
-      // Save JWT token and user info
+      // Save JWT token and user info after successful registration
       const { jwt, user } = response.data;
 
-      // Save the token in local storage or cookie
+      // Save the token and user ID in local storage
       localStorage.setItem('jwt', jwt);
       localStorage.setItem('userId', user?.id);
-      localStorage.setItem('recommenderId', user?.recommenderId);
       localStorage.setItem('tokenIssueTime', Date.now().toString());
 
-      const userRole = await axiosInstance.get('/users/me?populate=*', {
-        headers: {
-          Authorization: `Bearer ${jwt}}`, // Assuming token is stored in localStorage
-        },
-      });
-
-      localStorage.setItem('userRoleId', userRole?.data.role?.id);
-      // Retrieve the user account type from the response (assuming it's available)
-      const accountType = userRole?.data.accountType || userRole?.data.role?.name; // Adjust this based on your structure
-      console.log('User Account Type:', accountType);
-
-      // Redirect based on user account type, if necessary
-      if (accountType === 'Authenticated') {
-        router.push('/');
-      } else {
-        router.push('/profile');
-      }
+      // Redirect to home or a dashboard page after sign up
+      router.push('/');
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      console.log(err);
+      setError(
+        err?.response?.data?.error?.message
+          ? err?.response?.data?.error?.message
+          : 'Sign up failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
-  }, [email, password, router]);
+  }, [username, email, password, confirmPassword, router]);
 
   const renderForm = (
     <Box display="flex" flexDirection="column" alignItems="flex-end">
+      <TextField
+        fullWidth
+        name="username"
+        label="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        InputLabelProps={{ shrink: true }}
+        sx={{ mb: 3 }}
+      />
+
       <TextField
         fullWidth
         name="email"
@@ -74,10 +86,6 @@ export function SignInView() {
         InputLabelProps={{ shrink: true }}
         sx={{ mb: 3 }}
       />
-
-      {/* <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
-        Forgot password?
-      </Link> */}
 
       <TextField
         fullWidth
@@ -99,6 +107,26 @@ export function SignInView() {
         sx={{ mb: 3 }}
       />
 
+      <TextField
+        fullWidth
+        name="confirmPassword"
+        label="Confirm Password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        InputLabelProps={{ shrink: true }}
+        type={showConfirmPassword ? 'text' : 'password'}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                <Iconify icon={showConfirmPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+        sx={{ mb: 3 }}
+      />
+
       {error && (
         <Typography variant="body2" color="error" sx={{ mb: 2 }}>
           {error}
@@ -112,9 +140,9 @@ export function SignInView() {
         color="inherit"
         variant="contained"
         loading={loading}
-        onClick={handleSignIn}
+        onClick={handleSignUp}
       >
-        Sign in
+        Sign up
       </LoadingButton>
     </Box>
   );
@@ -122,37 +150,16 @@ export function SignInView() {
   return (
     <>
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-        <Typography variant="h5">Sign in</Typography>
+        <Typography variant="h5">Sign up</Typography>
         <Typography variant="body2" color="text.secondary">
-          Don’t have an account?
-          <Link href="/sign-up" variant="subtitle2" sx={{ ml: 0.5 }}>
-            Get started
+          Already have an account?
+          <Link href="/sign-in" variant="subtitle2" sx={{ ml: 0.5 }}>
+            Sign in
           </Link>
         </Typography>
       </Box>
 
       {renderForm}
-
-      {/* <Divider sx={{ my: 3, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
-        <Typography
-          variant="overline"
-          sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
-        >
-          OR
-        </Typography>
-      </Divider>
-
-      <Box gap={1} display="flex" justifyContent="center">
-        <IconButton color="inherit">
-          <Iconify icon="logos:google-icon" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify icon="eva:github-fill" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify icon="ri:twitter-x-fill" />
-        </IconButton>
-      </Box> */}
     </>
   );
 }

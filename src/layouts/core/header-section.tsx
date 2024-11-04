@@ -25,7 +25,7 @@ export type HeaderSectionProps = AppBarProps & {
     bottomArea?: React.ReactNode;
   };
   slotProps?: {
-    toolbar?: ToolbarProps;
+    // toolbar?: ToolbarProps;
     container?: ContainerProps;
   };
 };
@@ -71,32 +71,32 @@ export function HeaderSection({
     >
       {slots?.topArea}
 
-      <Toolbar
+      {/* <Toolbar
         disableGutters
         {...slotProps?.toolbar}
         sx={{
           ...toolbarStyles.default,
           ...slotProps?.toolbar?.sx,
         }}
+      > */}
+      <Container
+        {...slotProps?.container}
+        sx={{
+          height: 1,
+          display: 'flex',
+          alignItems: 'center',
+          ...slotProps?.container?.sx,
+        }}
       >
-        <Container
-          {...slotProps?.container}
-          sx={{
-            height: 1,
-            display: 'flex',
-            alignItems: 'center',
-            ...slotProps?.container?.sx,
-          }}
-        >
-          {slots?.leftArea}
+        {slots?.leftArea}
 
-          <Box sx={{ display: 'flex', flex: '1 1 auto', justifyContent: 'center' }}>
-            {slots?.centerArea}
-          </Box>
+        <Box sx={{ display: 'flex', flex: '1 1 auto', justifyContent: 'center' }}>
+          {slots?.centerArea}
+        </Box>
 
-          {slots?.rightArea}
-        </Container>
-      </Toolbar>
+        {slots?.rightArea}
+      </Container>
+      {/* </Toolbar> */}
 
       {slots?.bottomArea}
     </AppBar>

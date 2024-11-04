@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   // baseURL: 'http://localhost:1337/api',
-  baseURL: 'https://minecom-backend-apis-strapi.onrender.com/api', // Replace with your Strapi backend URL
+  baseURL: 'https://minecom-backend-d6a8dbfc03c9.herokuapp.com/api', // Replace with your Strapi backend URL
   timeout: 10000, // Optional timeout setting
   headers: {
     'Content-Type': 'application/json',
@@ -24,10 +24,10 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle response errors globally (e.g., token expiration, network errors)
     if (error.response && error.response.status === 401) {
-      // Handle unauthorized access, token expiration, etc.
-      console.error('Unauthorized access - possibly token expired');
+      localStorage.removeItem('jwt'); // Clear token on error
+      localStorage.removeItem('tokenIssueTime');
+      window.location.href = '/sign-in'; // Redirect to login
     }
     return Promise.reject(error);
   }

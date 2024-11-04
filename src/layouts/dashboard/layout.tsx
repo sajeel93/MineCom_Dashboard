@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -36,8 +36,24 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
 
   const [navOpen, setNavOpen] = useState(false);
-
+  const [filteredNavData, setFilteredNavData] = useState(navData);
   const layoutQuery: Breakpoint = 'lg';
+
+  useEffect(() => {
+    // Get the userRoleId from localStorage
+    const userRoleId = localStorage.getItem('userRoleId');
+
+    const filteredData = navData.filter((item) => {
+      if (userRoleId === '1') {
+        // Admin role, show all items
+        return true;
+      }
+      // Regular user role, hide 'User' and 'Bank Record'
+      return item.title !== 'User' && item.title !== 'Bank Record';
+    });
+
+    setFilteredNavData(filteredData);
+  }, []);
 
   return (
     <LayoutSection
@@ -69,7 +85,11 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                     [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
                   }}
                 />
-                <NavMobile data={navData} open={navOpen} onClose={() => setNavOpen(false)} />
+                <NavMobile
+                  data={filteredNavData}
+                  open={navOpen}
+                  onClose={() => setNavOpen(false)}
+                />
               </>
             ),
             rightArea: (
@@ -104,7 +124,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
       /** **************************************
        * Sidebar
        *************************************** */
-      sidebarSection={<NavDesktop data={navData} layoutQuery={layoutQuery} />}
+      sidebarSection={<NavDesktop data={filteredNavData} layoutQuery={layoutQuery} />}
       /** **************************************
        * Footer
        *************************************** */

@@ -36,7 +36,7 @@ export function AuthLayout({ sx, children, header }: AuthLayoutProps) {
           layoutQuery={layoutQuery}
           slotProps={{
             container: { maxWidth: false },
-            toolbar: { sx: { bgcolor: 'transparent', backdropFilter: 'unset' } },
+            // toolbar: { sx: { bgcolor: 'transparent', backdropFilter: 'unset' } },
           }}
           sx={{
             position: { [layoutQuery]: 'fixed' },

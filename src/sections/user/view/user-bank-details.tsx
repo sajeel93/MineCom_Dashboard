@@ -93,14 +93,14 @@ export function UserBankData() {
       </Box>
 
       <Card>
-        <UserTableToolbar
+        {/* <UserTableToolbar
           numSelected={table.selected.length}
           filterName={filterName}
           onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
             setFilterName(event.target.value);
             table.onResetPage();
           }}
-        />
+        /> */}
 
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
