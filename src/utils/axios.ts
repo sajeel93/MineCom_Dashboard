@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   // baseURL: 'http://localhost:1337/api',
-  baseURL: 'https://minecom-backend-d6a8dbfc03c9.herokuapp.com/api', // Replace with your Strapi backend URL
+  baseURL: 'https://minecom-backend-1f39d56f285e.herokuapp.com/api', // Replace with your Strapi backend URL
   timeout: 10000, // Optional timeout setting
   headers: {
     'Content-Type': 'application/json',
